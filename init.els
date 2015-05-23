@@ -1,0 +1,82 @@
+;; initial package setup
+;; (use-package tex-site
+;; 	     :ensure auctex)
+;;(push "path/to/use-package" load-path)
+(add-to-list 'load-path "~/.emacs.d/use-package/")
+(require 'use-package)
+(require 'package)
+(add-to-list
+ 'package-archives
+ '("melpa" . "http://melpa.org/packages/")
+ t)
+;;(package-refresh-contents)
+(package-initialize)
+
+;; this will install undo-tree if it's not there
+;; and it will set it up how I want
+;; (use-package company
+;;   :ensure t
+;;   :pin melpa-stable)
+(use-package undo-tree
+  :init (global-undo-tree-mode 1)
+  :bind
+  (("C-/" . undo-tree-undo)
+   ("C-x /" . undo-tree-redo)
+  ;;        ("C-c l" . undo-tree-switch-branch)
+   ("C-x u" . undo-tree-visualize))
+  :ensure t)
+(use-package neotree
+  :bind ("C-x t" . neotree-toggle)
+  :ensure t)
+(use-package ibuffer
+  :defer t
+  ;;:chords ((" 1". ibuffer))
+  :bind (("C-x c-b". ibuffer)))
+(use-package ample-theme
+  :init (load-theme 'ample-flat t)
+  :defer t
+  :ensure t)
+(use-package highlight-indentation
+  :defer t
+  :ensure t)
+;;(use-package auto-complete-config
+  ;;:disabled t
+  ;;:load-path "site-lisp/auto-complete"
+  ;;:diminish auto-complete-mode
+  ;;:init
+;;(use-package pos-tip)
+;;(ac-config-default)
+
+  ;;:config
+  ;; (ac-set-trigger-key "<backtab>")
+  ;; (setq ac-use-menu-map t)
+;; (use-package yasnippet
+;;   :init (yas-global-mode 1)
+;;   :defer t
+;;   :ensure t)
+(use-package smex
+  :bind ("M-x" . smex)
+  :ensure t)
+(use-package helm
+  :defer t
+  :init (use-package helm-grep
+          :defer t
+          ;;:chords ("hf" . helm-do-grep))
+  :ensure t)
+(use-package powerline
+  :defer t
+  :ensure t)
+;; Fullscreen of F11 Key
+(defun fullscreen ()
+  (interactive)
+  (set-frame-parameter nil 'fullscreen
+		       (if (frame-parameter nil 'fullscreen) nil 'fullboth)))
+(global-set-key [f11] 'fullscreen)
+(global-linum-mode t)
+(setq inhibit-splash-screen t)		; no splash screen, thanks
+(line-number-mode 1)			; have line numbers and
+(column-number-mode 1)			; column numbers in the mode line
+(tool-bar-mode -1)			; no tool bar with icons
+(scroll-bar-mode -1)			; no scroll bars\
+(tool-bar-mode -1)
+;;(menu-bar-mode -1))
