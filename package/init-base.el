@@ -1,3 +1,12 @@
+;;ido
+(require 'ido)
+(ido-mode t)
+(setq ido-save-directory-list-file "~/.emacs.d/.ido.last")
+(setq ido-enable-flex-matching t)
+(setq ido-use-filename-at-point 'guess)
+(setq ido-show-dot-for-dired t)
+(setq ido-default-buffer-method 'selected-window)
+
 ;;设置有用的个人信息,这在很多地方有用。
 (setq user-full-name "timepower")
 (setq user-mail-address "timepower@live.it")
