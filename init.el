@@ -26,7 +26,7 @@
 (use-package ibuffer
   :defer t
   ;;:chords ((" 1". ibuffer))
-  :bind (("C-x c-b". ibuffer)))
+  :bind (("C-x C-b". ibuffer)))
 (use-package smartparens
   :init (smartparens-global-mode 1)
   :defer t
