@@ -3,7 +3,6 @@
 (load "init-base.el")
 (eval-when-compile
   (require 'use-package))
-;; (require 'diminish)
 (require 'bind-key)
 (use-package jazz-theme
   ;;ample-theme
@@ -25,15 +24,14 @@
   :ensure t)
 (use-package ibuffer
   :defer t
-  ;;:chords ((" 1". ibuffer))
-  :bind (("C-x C-b". ibuffer)))
+  :bind ("C-x C-b". ibuffer))
 (use-package smartparens
   :init (smartparens-global-mode 1)
   :defer t
   :ensure t)
 (use-package smex
   :commands smex
-  :bind (("M-x" . smex))
+  :bind ("M-x" . smex)
   :ensure t)
 (use-package helm
   :init (require 'helm-config)
@@ -52,10 +50,6 @@
             ;; (after (:js-mode) (add-to-list 'ac-modes 'js-mode))
             ;; (after (:ruby-mode) (add-to-list 'ac-modes 'ruby-mode))
             (ac-config-default))
-  ;; :config (
-  ;; 		   (require 'auto-complete-config)
-  ;; 		   progn
-  ;; 			(use-package auto-complete-config))
   :ensure t)
 (use-package emmet-mode
   :init (require 'emmet-mode)
@@ -67,6 +61,12 @@
   :defer t
   :ensure t)
 (use-package web-mode
+  :ensure t)
+(use-package buffer-move
+  :bind (("C-s-p" . buf-move-up)
+		 ("C-s-n" . buf-move-down)
+		 ("C-s-b" . buf-move-left)
+		 ("C-s-f" . buf-move-right))
   :ensure t)
 ;; (use-package chinese-pyim
 ;;   :init (require 'chinese-pyim)
