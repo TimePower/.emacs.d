@@ -36,6 +36,9 @@
 ;; 显示列号
 (global-linum-mode t)
 
+;; Highlight Line
+(global-hl-line-mode)
+
 ;;显示括号匹配
 (show-paren-mode t)
 ;;(setq show-paren-style 'parentheses)
@@ -54,28 +57,31 @@
 ;;高亮显示选中文本
 (transient-mark-mode t)
 
-;; Chinese Font
-(dolist (charset '(kana han symbol cjk-misc bopomofo))
-  (set-fontset-font (frame-parameter nil 'font)
-					charset
-					(font-spec :family "Microsoft YaHei UI" :size 15)))
-
 (set-frame-font "Monaco 11" nil t)
+
+;;Chinese Font
+(set-fontset-font "fontset-default" 'han '("冬青黑体简体中文"))
+(setq face-font-rescale-alist '(("冬青黑体简体中文" . 1.2) ("Microsoft Yahei" . 1.2)))
 
 (global-font-lock-mode t);语法高亮
 
 (auto-image-file-mode t);打开图片显示功能
 
-(fset 'yes-or-no-p 'y-or-n-p);以 y/n代表 yes/no，可能你觉得不需要，呵呵。
+(fset 'yes-or-no-p 'y-or-n-p);以 y/n代表 yes/no
 
 ;; 按下C-x k立即关闭掉当前的buffer  
 (global-set-key (kbd "C-x k") 'kill-this-buffer)  
 
 ;; 回车缩进
-;;(global-set-key "\C-m" 'newline-and-indent)
+(global-set-key "\C-m" 'newline-and-indent)
 
 ;;Eshell
 (global-set-key [f9] 'eshell)
+
+;; Ansi-term
+(global-set-key [f8] 'ansi-term)
+(add-hook 'term-mode-hook (lambda()
+                (yas-minor-mode -1)))
 
 ;; 设置默认tab宽度
 (setq tab-width 4
@@ -136,7 +142,7 @@
 ;;       scroll-margin 3
 ;;       scroll-conservatively 10000)
 
-;;代码折叠 C-c TAB 来自对栈溢出
+;;代码折叠 C-c TAB
 (defun aj-toggle-fold ()
   "Toggle fold all lines larger than indentation on current line"
   (interactive)
