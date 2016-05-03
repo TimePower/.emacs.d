@@ -20,6 +20,9 @@
       '("%S" (buffer-file-name "%f"
 							   (dired-directory dired-directory "%b"))))
 
+;; Debug
+;;(setq debug-on-error t)
+
 ;;*scratch* buffer
 (setq initial-major-mode 'org-mode)
 (setq initial-scratch-message "Hello Emacs ^_^")
@@ -54,14 +57,18 @@
 ;;光标靠近鼠标指针时，让鼠标指针自动让开，别挡住视线。很好玩阿，这个功能
 (mouse-avoidance-mode 'animate)
 
+;; scroll-margin 5 靠近屏幕边沿 3 行时开始滚动
+(setq scroll-margin 5
+      scroll-conservatively 10000)
+
 ;;高亮显示选中文本
 (transient-mark-mode t)
 
-(set-frame-font "Monaco 11" nil t)
+(set-frame-font "Ubuntu Mono Bold 14" nil t)
 
 ;;Chinese Font
 (set-fontset-font "fontset-default" 'han '("冬青黑体简体中文"))
-(setq face-font-rescale-alist '(("冬青黑体简体中文" . 1.2) ("Microsoft Yahei" . 1.2)))
+(setq face-font-rescale-alist '(("冬青黑体简体中文" . 1) ("Microsoft Yahei" . 1.1)))
 
 (global-font-lock-mode t);语法高亮
 
@@ -81,13 +88,17 @@
 ;; Ansi-term
 (global-set-key [f8] 'ansi-term)
 (add-hook 'term-mode-hook (lambda()
-                (yas-minor-mode -1)))
+							(yas-minor-mode -1)))
+
+;; EWW Bookmarks List
+(global-set-key (kbd "C-c b") 'eww-list-bookmarks)
 
 ;; 设置默认tab宽度
-(setq tab-width 4
-      indent-tabs-mode t
-      c-basic-offset 4)
+(setq-default indent-tabs-mode nil)
 (setq default-tab-width 4)
+(setq tab-width 4) ; or any other preferred value
+(defvaralias 'c-basic-offset 'tab-width)
+(defvaralias 'cperl-indent-level 'tab-width)
 
 ;;(loop for x downfrom 40 to 1 do
 ;;    (setq tab-stop-list (cons (* x 4) tab-stop-list)))
@@ -111,8 +122,8 @@
 		 (count-lines
 		  (window-start) (window-end))))
     (scroll-down)))
-(global-set-key (kbd "M-n") 'hold-line-scroll-up)
-(global-set-key (kbd "M-p") 'hold-line-scroll-down)
+;; (global-set-key (kbd "M-n") 'hold-line-scroll-up)
+;; (global-set-key (kbd "M-p") 'hold-line-scroll-down)
 
 ;;"Add a line next current like IDEA"
 (defun newline-next-current()
@@ -153,3 +164,23 @@
       (set-selective-display
        (if selective-display nil (or col 1))))))
 (global-set-key (kbd "C-c TAB") 'aj-toggle-fold)
+
+;; move line up
+(defun move-line-up ()
+  (interactive)
+  (transpose-lines 1)
+  (previous-line 2))
+(global-set-key (kbd "C-c p") 'move-line-up)
+;; move line down
+(defun move-line-down ()
+  (interactive)
+  (next-line 1)
+  (transpose-lines 1)
+  (previous-line 1))
+(global-set-key (kbd "C-c n") 'move-line-down)
+
+;; ORG-MODE
+(defun gtd ()
+  (interactive)
+  (find-file "~/Dropbox/org-mode/todo.org")
+  )
