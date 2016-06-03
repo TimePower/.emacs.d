@@ -7,6 +7,9 @@
 (setq ido-show-dot-for-dired t)
 (setq ido-default-buffer-method 'selected-window)
 
+;; (require 'tramp)
+;; (setq tramp-default-method "ssh")
+
 ;;设置有用的个人信息,这在很多地方有用。
 (setq user-full-name "timepower")
 (setq user-mail-address "timepower@live.it")
@@ -24,7 +27,7 @@
 ;;(setq debug-on-error t)
 
 ;;*scratch* buffer
-(setq initial-major-mode 'org-mode)
+(setq initial-major-mode 'text-mode)
 (setq initial-scratch-message "Hello Emacs ^_^")
 
 ;; 去掉工具栏
@@ -48,11 +51,12 @@
 
 ;; 默认显示 80列就换行
 (setq default-fill-column 80)
+(setq refill-mode t)
 
 ;;显示时间，格式如下
-(display-time-mode 1)
-(setq display-time-24hr-format t)
-(setq display-time-day-and-date t)
+;; (display-time-mode 1)
+;; (setq display-time-24hr-format t)
+;; (setq display-time-day-and-date t)
 
 ;;光标靠近鼠标指针时，让鼠标指针自动让开，别挡住视线。很好玩阿，这个功能
 (mouse-avoidance-mode 'animate)
@@ -82,13 +86,21 @@
 ;; 回车缩进
 (global-set-key "\C-m" 'newline-and-indent)
 
-;;Eshell
+;; Open Eshell
 (global-set-key [f9] 'eshell)
+;; Eshell Clear
+(defun eshell/clear ()
+  "Clear the eshell buffer."
+  (let ((inhibit-read-only t))
+    (erase-buffer)
+    (eshell-send-input)))
 
 ;; Ansi-term
 (global-set-key [f8] 'ansi-term)
 (add-hook 'term-mode-hook (lambda()
 							(yas-minor-mode -1)))
+(autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
+;; (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 
 ;; EWW Bookmarks List
 (global-set-key (kbd "C-c b") 'eww-list-bookmarks)
@@ -125,7 +137,7 @@
 ;; (global-set-key (kbd "M-n") 'hold-line-scroll-up)
 ;; (global-set-key (kbd "M-p") 'hold-line-scroll-down)
 
-;;"Add a line next current like IDEA"
+;; Add a line next current like IDEA"
 (defun newline-next-current()
   (interactive)
   (prog1 (end-of-line)

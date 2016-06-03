@@ -1,34 +1,32 @@
 (add-to-list 'load-path "~/.emacs.d/package/")
 (load "init-elpa.el")
 (load "init-base.el")
-;;(load "init-page.el")
+;; (load "init-page.el")
 (eval-when-compile
   (require 'use-package))
 (require 'bind-key)
-(use-package ample-theme
-  :init (progn (load-theme 'ample t t)
-               (load-theme 'ample-flat t t)
-               (load-theme 'ample-light t t)
-               (enable-theme 'ample-light))
+(use-package dracula-theme
+  :init (load-theme 'dracula t)
+  ;; Dracula-theme
   ;; Jazz-theme
   ;; Ample-theme
   ;; Junio
-  :defer t
   :ensure t)
 (use-package window-numbering
   :init (window-numbering-mode t)
-  :defer t
+  ;; :defer t
   :ensure t)
 (use-package undo-tree
   :init (global-undo-tree-mode 1)
   :bind
   (("C-/" . undo-tree-undo)
    ("C-x /" . undo-tree-redo)
+   ;;("C-c l" . undo-tree-switch-branch)
    ("C-x u" . undo-tree-visualize))
   :ensure t)
 (use-package smartparens
   :init (smartparens-global-mode 1)
-  :defer t
+  ;; :defer t
   :ensure t)
 (use-package smex
   :commands smex
@@ -37,38 +35,74 @@
 (use-package helm
   :init (progn
           (require 'helm-config)
-          (helm-mode t))
+          ;; Fix ad-handle-definition: 'tramp-read-passwd' got redefined
+          ;; https://github.com/emacs-helm/helm/issues/1498
+          (let ((ad-redefinition-action 'accept))
+            (helm-mode 1)))
   :config (progn
+            (helm-autoresize-mode 1)
             (setq helm-M-x-fuzzy-match t
                   helm-split-window-in-side-p t
                   ;; open helm buffer inside current window, not occupy whole other window
                   helm-move-to-line-cycle-in-source t
                   ;; move to end or beginning of source when reaching top or bottom of source.
                   helm-ff-search-library-in-sexp t
-                  ;; search for library in 'require' and 'declare-function' sexp.
+                  ;; search for library in `require' and `declare-function' sexp.
                   helm-scroll-amount 8
                   ;; scroll 8 lines other window using M-<next>/M-<prior>
-                  helm-ff-file-name-history-use-recentf t)
+                  helm-ff-file-name-history-use-recentf t
+                  helm-autoresize-max-height 25
+                  helm-autoresize-min-height 25)
             ;; 提供更好的 Kill Ring
             (global-set-key (kbd "M-y") 'helm-show-kill-ring)
             ;; 提供更好的关键字搜索
-            (global-set-key (kbd "C-s") 'helm-occur)
+            ;; (global-set-key (kbd "C-s") 'helm-occur)
             ;; 提供 ido 备用, 可用 C-c / 搜索制定目录文件
             (global-set-key (kbd "C-c f") 'helm-find-files)
+            ;;(global-set-key (kbd "C-c h") 'helm-command-prefix)
+            ;; (global-set-key (kbd "C-M-x") 'helm-M-x)
+            ;; rebind tab to run persistent action
             (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action))
-  :bind ("C-x C-b" . helm-buffers-list)
-  :defer t
+  :bind (("C-x C-b" . helm-buffers-list)
+         ("C-M-x" . helm-M-x))
+  ;; :defer t
+  :ensure t)
+(use-package swiper-helm
+  :ensure t)
+(use-package swiper
+  :config (progn
+            (ivy-mode 1)
+            (setq ivy-use-virtual-buffers t)
+            (global-set-key "\C-s" 'swiper))
+  :ensure t)
+(use-package avy
+  :config (progn
+            (global-set-key (kbd "C-'") 'avy-goto-char)
+            (global-set-key (kbd "C-c '") 'avy-goto-line)
+            (global-set-key (kbd "C-c s") 'avy-goto-word-1))
+  :ensure t)
+(use-package ace-jump-mode
+  :config (progn
+            (autoload
+              'ace-jump-mode
+              "ace-jump-mode"
+              "Emacs quick move minor mode"
+              t)
+            ;; you can select the key you prefer to
+            ;;(define-key global-map (kbd "C-c SPC") 'ace-jump-mode
+            (define-key global-map (kbd "C-c SPC") 'ace-jump-char-mode))
   :ensure t)
 (use-package neotree
   :init (require 'neotree)
   :config (global-set-key [f6] 'neotree-toggle)
   :ensure t)
-(use-package yasnippet
-  :init (yas-global-mode 1)
-  :config (progn
-            (add-to-list 'yas/root-directory "~/.emacs.d/snippets")
-            (yas/initialize))
-  :ensure t)
+;; (use-package yasnippet
+;; :defer t
+;;   :init (yas-global-mode 1)
+;;   :config (progn
+;;             (add-to-list 'yas/root-directory "~/.emacs.d/snippets")
+;;             (yas/initialize))
+;;   :ensure t)
 (use-package auto-complete
   :config (progn
             ;; (after (:slime) (add-to-list 'ac-modes 'slime-repl-mode))
@@ -95,6 +129,15 @@
             (ac-config-default)
             (provide 'init-auto-complete))
   :ensure t)
+;; (use-package angular-snippets
+;;   :init (require 'angular-snippets)
+;;   :ensure t)
+;; (use-package angular-mode
+;;   :config (progn
+;;             (add-to-list 'ac-dictionary-directories "~/.emacs.d/snippets/ac-dict")
+;;             (add-to-list 'ac-modes 'angular-html-mode)
+;;             (add-to-list 'ac-modes 'angular-mode))
+;;  :ensure t)
 (use-package tern
   :config (add-hook 'js2-mode-hook (lambda () (tern-mode t)))
   :ensure t)
@@ -133,15 +176,22 @@
             (add-hook 'sgml-mode-hook 'emmet-mode)
             (add-hook 'css-mode-hook 'emmet-mode)
             (add-hook 'web-mode-hook 'emmet-mode))
-  :defer t
+  ;; :defer t
   :ensure t)
 (use-package web-mode
   :config (progn
             (add-hook 'html-mode-hook 'web-mode)
             (setq web-mode-enable-current-element-highlight t)
             (setq web-mode-enable-current-column-highlight t)
-            (setq web-mode-enable-css-colorization t))
-:ensure t)
+            (setq web-mode-enable-css-colorization t)
+            ;; (setq web-mode-ac-sources-alist
+            ;;       '(("css" . (ac-source-css-property))
+            ;; ("html" . (ac-source-html-tag
+            ;;            ac-source-html-attr
+            ;;            ac-source-html-attrv))
+            ;;)
+            )
+  :ensure t)
 (use-package buffer-move
   :bind (("C-s-p" . buf-move-up)
          ("C-s-n" . buf-move-down)
@@ -179,20 +229,41 @@
 (use-package flycheck
   ;; :config (global-flycheck-mode)
   :ensure t)
-(use-package emms
-  :config (progn
-            (require 'emms-setup)
-            (emms-all)
-            (emms-default-players)
-            (global-set-key (kbd "C-c e c") 'emms-pause)
-            (global-set-key (kbd "C-c e p") 'emms-previous)
-            (global-set-key (kbd "C-c e n") 'emms-next))
-  :ensure t)
-(use-package emms-player-mpv
-  :config (progn
-            ;; mpv 作为 emms 后端
-            (require 'emms-player-mpv)
-            (add-to-list 'emms-player-list 'emms-player-mpv))
+;; (use-package emms
+;;   ;; :defer t
+;;   :config (progn
+;;             (require 'emms-setup)
+;;             (emms-all)
+;;             (emms-default-players)
+;;             (emms-standard)
+;;             (emms-default-players)
+;;             (setq emms-repeat-playlist t)
+;;             (setq emms-player-list '(emms-player-mplayer))
+;;             (setq emms-source-file-directory "~/Music/Heavy Metal/")
+;;             (global-set-key (kbd "C-c e c") 'emms-pause)
+;;             (global-set-key (kbd "C-c e p") 'emms-previous)
+;;             (global-set-key (kbd "C-c e n") 'emms-next))
+;;   :ensure t)
+;; (use-package emms-player-mpv
+;;   ;; :defer t
+;;   :config (progn
+;;             ;; mpv 作为 emms 后端
+;;             (require 'emms-player-mpv)
+;;             (add-to-list 'emms-player-list 'emms-player-mpv))
+;;   :ensure t)
+;; (use-package emms-mode-line-cycle
+;;   ;; :defer t
+;;   :config (progn
+;;             (emms-mode-line 1)
+;;             (emms-playing-time 1)
+
+;;             ;; `emms-mode-line-cycle' can be used with emms-mode-line-icon.
+;;             (require 'emms-mode-line-icon)
+;;             (custom-set-variables '(emms-mode-line-cycle-use-icon-p t))
+
+;;             (emms-mode-line-cycle 1))
+;;   :ensure t)
+(use-package ocodo-svg-modelines
   :ensure t)
 (use-package youdao-dictionary
   :config (progn
@@ -202,7 +273,7 @@
             (global-set-key (kbd "C-c y") 'youdao-dictionary-search-at-point))
   :ensure t)
 (use-package rainbow-mode
-  :defer t
+  ;; :defer t
   :ensure t)
 (use-package openwith
   :config (progn
@@ -231,22 +302,22 @@
                      ))
               (openwith-mode 1)))
   :ensure t)
-(use-package ace-jump-mode
-  :config (progn
-            (autoload
-              'ace-jump-mode
-              "ace-jump-mode"
-              "Emacs quick move minor mode"
-              t)
-            ;; you can select the key you prefer to
-            (define-key global-map (kbd "C-c SPC") 'ace-jump-char-mode))
-  :ensure t)
 (use-package multiple-cursors
   :init (require 'multiple-cursors)
   :config (progn
             (global-set-key (kbd "C->") 'mc/mark-next-like-this)
             (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
             (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this))
+  :ensure t)
+;; 貌似不支持 nyan
+;; (use-package main-line
+;;   :init (require 'main-line)
+;;   :config (setq main-line-separator-style 'zigzag)
+;;   :ensure t)
+(use-package powerline
+  :config (progn
+            (require 'powerline)
+            (powerline-default-theme))
   :ensure t)
 (use-package nyan-mode
   :init (nyan-mode t)
@@ -255,8 +326,8 @@
   :init (require 'org-bullets)
   :config (progn
             (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-
-            ;;             (setq org-todo-keywords '((sequence &amp;amp;quot;? TODO(t)&amp;amp;quot; &amp;amp;quot;|&amp;amp;quot; &amp;amp;quot;? DONE(d)&amp;amp;quot;)
+            (add-hook 'org-mode-hook 'refill-mode)
+            ;; (setq org-todo-keywords '((sequence &amp;amp;quot;? TODO(t)&amp;amp;quot; &amp;amp;quot;|&amp;amp;quot; &amp;amp;quot;? DONE(d)&amp;amp;quot;)
             ;; (sequence &amp;amp;quot;|&amp;amp;quot; &amp;amp;quot;? WAITING(w)&amp;amp;quot;)
             ;; (sequence &amp;amp;quot;|&amp;amp;quot; &amp;amp;quot;? CANCELED(c)&amp;amp;quot;)))
 
@@ -273,11 +344,13 @@
   :config (progn
             (add-hook 'emacs-lisp-mode-hook 'highlight-parentheses-mode))
   :ensure t)
-(use-package magit
-  :init (require 'magit)
-  :config(progn
-           (with-eval-after-load 'info
-             (info-initialize)
-             (add-to-list 'Info-directory-list
-                          "~/.emacs.d/site-lisp/magit/Documentation/")))
+;; (use-package magit
+;;   :init (require 'magit)
+;;   :config(progn
+;;            (with-eval-after-load 'info
+;;              (info-initialize)
+;;              (add-to-list 'Info-directory-list
+;;                           "~/.emacs.d/site-lisp/magit/Documentation/")))
+;;   :ensure t)
+(use-package esup
   :ensure t)
