@@ -4,6 +4,7 @@
 ;; (load "init-page.el")
 (eval-when-compile
   (require 'use-package))
+(require 'diminish)
 (require 'bind-key)
 (use-package dracula-theme
   :init (load-theme 'dracula t)
@@ -17,6 +18,7 @@
   ;; :defer t
   :ensure t)
 (use-package undo-tree
+  :diminish undo-tree-mode
   :init (global-undo-tree-mode 1)
   :bind
   (("C-/" . undo-tree-undo)
@@ -33,6 +35,7 @@
   :bind ("M-x" . smex)
   :ensure t)
 (use-package helm
+  :diminish helm-mode
   :init (progn
           (require 'helm-config)
           ;; Fix ad-handle-definition: 'tramp-read-passwd' got redefined
@@ -70,6 +73,7 @@
 (use-package swiper-helm
   :ensure t)
 (use-package swiper
+  :diminish ivy-mode
   :config (progn
             (ivy-mode 1)
             (setq ivy-use-virtual-buffers t)
@@ -82,6 +86,7 @@
             (global-set-key (kbd "C-c s") 'avy-goto-word-1))
   :ensure t)
 (use-package ace-jump-mode
+  :diminish ace-jump-mode
   :config (progn
             (autoload
               'ace-jump-mode
@@ -95,6 +100,18 @@
 (use-package neotree
   :init (require 'neotree)
   :config (global-set-key [f6] 'neotree-toggle)
+  :ensure t)
+(use-package projectile
+  :diminish projectile-mode
+  :config (progn
+            (projectile-global-mode)
+            (add-hook 'js2-mode-hook 'projectile-mode)
+            (add-hook 'web-mode-hook 'projectile-mode)
+            (add-hook 'css-mode-hook 'projectile-mode)
+            (setq projectile-enable-caching t)
+            (setq projectile-globally-ignored-directories '("node_modules")))
+  :ensure t)
+(use-package helm-projectile
   :ensure t)
 ;; (use-package yasnippet
 ;; :defer t
@@ -119,12 +136,12 @@
             (define-key ac-mode-map (kbd "C-c i") 'auto-complete)
             (define-key ac-menu-map "\C-n" 'ac-next)
             (define-key ac-menu-map "\C-p" 'ac-previous)
-            (dolist (mode '(magit-log-edit-mode
-                            log-edit-mode org-mode text-mode haml-mode
-                            sass-mode yaml-mode csv-mode espresso-mode haskell-mode
-                            html-mode web-mode sh-mode smarty-mode clojure-mode
-                            lisp-mode textile-mode markdown-mode tuareg-mode
-                            js2-mode css-mode less-css-mode))
+            (dolist (mode '(magit-log-edit-mode cperl-mode perl-mode
+                                                log-edit-mode org-mode text-mode haml-mode conf-mode
+                                                sass-mode yaml-mode csv-mode espresso-mode haskell-mode
+                                                html-mode web-mode sh-mode smarty-mode clojure-mode
+                                                lisp-mode textile-mode markdown-mode tuareg-mode
+                                                js2-mode css-mode less-css-mode))
               (add-to-list 'ac-modes mode))
             (ac-config-default)
             (provide 'init-auto-complete))
@@ -142,6 +159,7 @@
   :config (add-hook 'js2-mode-hook (lambda () (tern-mode t)))
   :ensure t)
 (use-package company
+  :diminish company-mode
   :init (global-company-mode t)
   :config (progn
             (add-hook 'after-init-hook 'global-company-mode)
@@ -226,6 +244,23 @@
 (use-package go-mode
   :init (require 'go-mode-autoloads)
   :ensure t)
+(use-package cperl-mode
+  :mode ("\\.pl\\'" . cperl-mode)
+  )
+(use-package plsense
+  :config (progn
+            (require 'plsense)
+            ;; Key binding
+            (setq plsense-popup-help-key "C-:")
+            ;; (setq plsense-display-help-buffer-key "M-:")
+            ;; (setq plsense-jump-to-definition-key "C->")
+            (add-hook 'cperl-mode-hook 'plsense-setup-current-buffer)
+            ;; Make config suit for you. About the config item, eval the following sexp.
+            ;; (customize-group "plsense")
+
+            ;; Do setting recommemded configuration
+            (plsense-config-default))
+  :ensure t)
 (use-package flycheck
   ;; :config (global-flycheck-mode)
   :ensure t)
@@ -263,8 +298,8 @@
 
 ;;             (emms-mode-line-cycle 1))
 ;;   :ensure t)
-(use-package ocodo-svg-modelines
-  :ensure t)
+;; (use-package ocodo-svg-modelines
+;;   :ensure t)
 (use-package youdao-dictionary
   :config (progn
             ;; Enable Cache
@@ -273,6 +308,8 @@
             (global-set-key (kbd "C-c y") 'youdao-dictionary-search-at-point))
   :ensure t)
 (use-package rainbow-mode
+  :config (progn
+            (add-hook 'css-mode-hook 'rainbow-mode))
   ;; :defer t
   :ensure t)
 (use-package openwith
@@ -286,11 +323,11 @@
                               "ogm" "ogg" "mkv"))
                            "audacious"
                            '(file))
-                     (list (openwith-make-extension-regexp
-                            '("xbm" "pbm" "pgm" "ppm" "pnm"
-                              "png" "bmp" "tif" "jpeg" "jpg"))
-                           "gpicview"
-                           '(file))
+                     ;; (list (openwith-make-extension-regexp
+                     ;;        '("xbm" "pbm" "pgm" "ppm" "pnm"
+                     ;;          "png" "bmp" "tif" "jpeg" "jpg"))
+                     ;;       "gpicview"
+                     ;;       '(file))
                      (list (openwith-make-extension-regexp
                             '("pdf"))
                            "zathura"
@@ -326,23 +363,29 @@
   :init (require 'org-bullets)
   :config (progn
             (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
-            (add-hook 'org-mode-hook 'refill-mode)
+            ;; (add-hook 'org-mode-hook 'refill-mode)
             ;; (setq org-todo-keywords '((sequence &amp;amp;quot;? TODO(t)&amp;amp;quot; &amp;amp;quot;|&amp;amp;quot; &amp;amp;quot;? DONE(d)&amp;amp;quot;)
             ;; (sequence &amp;amp;quot;|&amp;amp;quot; &amp;amp;quot;? WAITING(w)&amp;amp;quot;)
             ;; (sequence &amp;amp;quot;|&amp;amp;quot; &amp;amp;quot;? CANCELED(c)&amp;amp;quot;)))
-
             )
   :ensure t)
 (use-package highlight-indentation
+  :diminish highlight-indentation-mode
+  :diminish highlight-indentation-current-column-mode
   :init (require 'highlight-indentation)
   :config(progn
            (set-face-background 'highlight-indentation-face "#959595")
            (set-face-background 'highlight-indentation-current-column-face "#CDBFBF"))
   :ensure t)
 (use-package highlight-parentheses
+  :diminish highlight-parentheses-mode
   :init (require 'highlight-parentheses)
   :config (progn
-            (add-hook 'emacs-lisp-mode-hook 'highlight-parentheses-mode))
+            (add-hook 'emacs-lisp-mode-hook 'highlight-parentheses-mode)
+            (add-hook 'cperl-mode-hook 'highlight-parentheses-mode))
+  :ensure t)
+(use-package vi-tilde-fringe
+  :init (global-vi-tilde-fringe-mode t)
   :ensure t)
 ;; (use-package magit
 ;;   :init (require 'magit)
@@ -350,7 +393,34 @@
 ;;            (with-eval-after-load 'info
 ;;              (info-initialize)
 ;;              (add-to-list 'Info-directory-list
-;;                           "~/.emacs.d/site-lisp/magit/Documentation/")))
+;;                           "~/.emacs.d/site-lisp/magit/Documentation/"))
+;;            (setq magit-completing-read-function 'ivy-completing-read))
+;; :ensure t)
+;; (use-package symon
+;;   :config (progn
+;;             (require 'symon)
+;;             (symon-mode))
+;;   :ensure t)
+;; (use-package weibo
+;;   :config (progn
+;;             (require 'weibo)
+;;             (setq weibo-consumer-key "2645755358"
+;;                   weibo-consumer-secret "bb543651eedc797f8fdc5f273d569dc3"
+;;                   ))
 ;;   :ensure t)
 (use-package esup
   :ensure t)
+;; (use-package diminish
+;;   :ensure t)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(magit-push-arguments nil))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )

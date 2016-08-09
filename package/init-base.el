@@ -1,14 +1,14 @@
 ;;ido
-(require 'ido)
-(ido-mode t)
-(setq ido-save-directory-list-file "~/.emacs.d/.ido.last")
-(setq ido-enable-flex-matching t)
-(setq ido-use-filename-at-point 'guess)
-(setq ido-show-dot-for-dired t)
-(setq ido-default-buffer-method 'selected-window)
-
-;; (require 'tramp)
-;; (setq tramp-default-method "ssh")
+;; (require 'ido)
+;; (ido-mode t)
+;; (setq ido-save-directory-list-file "~/.emacs.d/.ido.last")
+;; (setq ido-enable-flex-matching t)
+;; (setq ido-use-filename-at-point 'guess)
+;; (setq ido-show-dot-for-dired t)
+;; (setq ido-default-buffer-method 'selected-window)
+;; 
+(require 'tramp)
+(setq tramp-default-method "ssh")
 
 ;;设置有用的个人信息,这在很多地方有用。
 (setq user-full-name "timepower")
@@ -40,20 +40,20 @@
 (scroll-bar-mode -1)
 
 ;; 显示列号
-(global-linum-mode t)
+;; (global-linum-mode t)
 
 ;; Highlight Line
 (global-hl-line-mode)
 
-;;显示括号匹配
+;; 显示括号匹配
 (show-paren-mode t)
 ;;(setq show-paren-style 'parentheses)
 
 ;; 默认显示 80列就换行
 (setq default-fill-column 80)
-(setq refill-mode t)
+;; (setq refill-mode t)
 
-;;显示时间，格式如下
+;; 显示时间，格式如下
 ;; (display-time-mode 1)
 ;; (setq display-time-24hr-format t)
 ;; (setq display-time-day-and-date t)
@@ -65,15 +65,15 @@
 (setq scroll-margin 5
       scroll-conservatively 10000)
 
-;;高亮显示选中文本
+;; 高亮显示选中文本
 (transient-mark-mode t)
 
-(set-frame-font "Ubuntu Mono Bold 14" nil t)
+(set-frame-font "Ubuntu Mono 12" nil t)
 
-;;Chinese Font
+;; Chinese Font
 (set-fontset-font "fontset-default" 'han '("冬青黑体简体中文"))
-(setq face-font-rescale-alist '(("冬青黑体简体中文" . 1) ("Microsoft Yahei" . 1.1)))
-
+(setq face-font-rescale-alist '(("冬青黑体简体中文" . 1.0) ("Microsoft Yahei" . 1.0)))
+;; 
 (global-font-lock-mode t);语法高亮
 
 (auto-image-file-mode t);打开图片显示功能
@@ -190,8 +190,21 @@
   (transpose-lines 1)
   (previous-line 1))
 (global-set-key (kbd "C-c n") 'move-line-down)
-
+;; Diable backup file
+(setq make-backup-files nil)
 ;; ORG-MODE
+(defadvice org-html-paragraph (before org-html-paragraph-advice
+                                      (paragraph contents info) activate)
+  "Join consecutive Chinese lines into a single long line without
+unwanted space when exporting org-mode to html."
+  (let* ((origin-contents (ad-get-arg 1))
+         (fix-regexp "[[:multibyte:]]")
+         (fixed-contents
+          (replace-regexp-in-string
+           (concat
+            "\\(" fix-regexp "\\) *\n *\\(" fix-regexp "\\)") "\\1\\2" origin-contents)))
+
+    (ad-set-arg 1 fixed-contents)))
 (defun gtd ()
   (interactive)
   (find-file "~/Dropbox/org-mode/todo.org")

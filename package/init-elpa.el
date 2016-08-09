@@ -2,7 +2,8 @@
 ;; (require 'use-package)
 (require 'package)
 ;; 增加软件包仓库
-(setq package-archives '(("melpa" . "http://melpa.milkbox.net/packages/")
+(setq package-archives '(("elpa" . "https://elpa.gnu.org/packages/")
+                         ("melpa" . "http://melpa.milkbox.net/packages/")
                          ("melpa-stable" . "http://melpa-stable.milkbox.net/packages/")
                          ("org" . "http://orgmode.org/elpa/")))
 ;; 定义require-package函数
