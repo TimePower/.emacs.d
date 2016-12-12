@@ -1,3 +1,10 @@
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+(package-initialize)
+
 (add-to-list 'load-path "~/.emacs.d/package/")
 (load "init-elpa.el")
 (load "init-base.el")
@@ -6,6 +13,8 @@
   (require 'use-package))
 (require 'diminish)
 (require 'bind-key)
+;; 需要单独配置 org-page
+(load "init-orgpage.el")
 (use-package dracula-theme
   :init (load-theme 'dracula t)
   ;; Dracula-theme
@@ -108,18 +117,20 @@
             (add-hook 'js2-mode-hook 'projectile-mode)
             (add-hook 'web-mode-hook 'projectile-mode)
             (add-hook 'css-mode-hook 'projectile-mode)
+            (add-hook 'c-mode-hook 'projectile-mode)
             (setq projectile-enable-caching t)
             (setq projectile-globally-ignored-directories '("node_modules")))
   :ensure t)
 (use-package helm-projectile
   :ensure t)
-;; (use-package yasnippet
-;; :defer t
-;;   :init (yas-global-mode 1)
-;;   :config (progn
-;;             (add-to-list 'yas/root-directory "~/.emacs.d/snippets")
-;;             (yas/initialize))
-;;   :ensure t)
+(use-package yasnippet
+  ;; :defer t
+  :diminish yas-global-mode
+  :init (yas-global-mode 1)
+  :config (progn
+            (add-to-list 'yas/root-directory "~/.emacs.d/snippets")
+            (yas/initialize))
+  :ensure t)
 (use-package auto-complete
   :config (progn
             ;; (after (:slime) (add-to-list 'ac-modes 'slime-repl-mode))
@@ -163,6 +174,15 @@
   :init (global-company-mode t)
   :config (progn
             (add-hook 'after-init-hook 'global-company-mode)
+            (add-hook 'c-mode-hook 'company-mode)
+            (add-to-list 'company-backends 'company-capf)
+            ;; Fix Completion of org-mode
+            (defun my-org-mode-hook ()
+              (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
+            (add-hook 'org-mode-hook #'my-org-mode-hook)
+            ;; Company-Semantic Is Original Semantic Completion Of Company-Mode
+            ;; So Diable It, Use Company-Clang.
+            (setq company-backends (delete 'company-semantic company-backends))
             ;; bigger popup window
             (setq company-tooltip-limit 20)
             ;; align annotations to the right tooltip border
@@ -172,7 +192,14 @@
             ;; start autocompletion only after typing
             (setq company-begin-commands '(self-insert-command))
             ;; Force complete file names on "C-c /" key
-            (global-set-key (kbd "C-c /") 'company-files))
+            (global-set-key (kbd "C-c /") 'company-files)
+            (global-set-key (kbd "C-<tab>") 'company-complete-common)
+            ;; 防止按键冲突备用
+            (global-set-key (kbd "C-|") 'company-complete)
+            )
+  :ensure t)
+(use-package company-c-headers
+  :config (add-to-list 'company-backends 'company-c-headers)
   :ensure t)
 (use-package company-web
   :config (progn
@@ -184,10 +211,10 @@
   :config (progn
             (add-to-list 'company-backends 'company-tern)
             (setq company-tern-meta-as-single-line t)
-            (setq company-tooltip-align-annotations t)
-            (global-set-key (kbd "C-<tab>") 'company-complete-common))
+            (setq company-tooltip-align-annotations t))
   :ensure t)
 (use-package emmet-mode
+  :diminish emmet-mode
   :init (require 'emmet-mode)
   :config (progn
             (add-hook 'html-mode-hook 'emmet-mode)
@@ -239,11 +266,21 @@
             (add-hook 'racket-mode-hook
                       (lambda ()
                         (define-key racket-mode-map (kbd "C-c r") 'racket-send-region)))
+            (setq tab-always-indent 'complete)
+            (defun my-racket-mode-hook ()
+              (set (make-local-variable 'company-backends)
+                   '((company-capf company-dabbrev-code))))
+            (add-hook 'racket-mode-hook 'my-racket-mode-hook)
             (add-hook 'racket-mode-hook 'highlight-parentheses-mode))
   :ensure t)
-(use-package go-mode
-  :init (require 'go-mode-autoloads)
+(use-package geiser
   :ensure t)
+(use-package tuareg
+  :mode ("\\.ml\\'" . tuareg-mode)
+  :ensure t)
+;; (use-package go-mode
+;;   :init (require 'go-mode-autoloads)
+;;   :ensure t)
 (use-package cperl-mode
   :mode ("\\.pl\\'" . cperl-mode)
   )
@@ -264,42 +301,44 @@
 (use-package flycheck
   ;; :config (global-flycheck-mode)
   :ensure t)
-;; (use-package emms
-;;   ;; :defer t
-;;   :config (progn
-;;             (require 'emms-setup)
-;;             (emms-all)
-;;             (emms-default-players)
-;;             (emms-standard)
-;;             (emms-default-players)
-;;             (setq emms-repeat-playlist t)
-;;             (setq emms-player-list '(emms-player-mplayer))
-;;             (setq emms-source-file-directory "~/Music/Heavy Metal/")
-;;             (global-set-key (kbd "C-c e c") 'emms-pause)
-;;             (global-set-key (kbd "C-c e p") 'emms-previous)
-;;             (global-set-key (kbd "C-c e n") 'emms-next))
-;;   :ensure t)
-;; (use-package emms-player-mpv
-;;   ;; :defer t
-;;   :config (progn
-;;             ;; mpv 作为 emms 后端
-;;             (require 'emms-player-mpv)
-;;             (add-to-list 'emms-player-list 'emms-player-mpv))
-;;   :ensure t)
-;; (use-package emms-mode-line-cycle
-;;   ;; :defer t
-;;   :config (progn
-;;             (emms-mode-line 1)
-;;             (emms-playing-time 1)
+(use-package cmake-mode
+  :mode ("CMakeLists\\.txt\\'" . cmake-mode)
+  :ensure t)
+(use-package emms
+  ;; :defer t
+  :config (progn
+            (require 'emms-setup)
+            (emms-all)
+            (emms-default-players)
+            (emms-standard)
+            (setq emms-repeat-playlist t)
+            (setq emms-player-list '(emms-player-mplayer))
+            (setq emms-source-file-directory "~/Music/Heavy Metal/")
+            (global-set-key (kbd "C-c e c") 'emms-pause)
+            (global-set-key (kbd "C-c e p") 'emms-previous)
+            (global-set-key (kbd "C-c e n") 'emms-next))
+  :ensure t)
+(use-package emms-player-mpv
+  ;; :defer t
+  :config (progn
+            ;; mpv 作为 emms 后端
+            (require 'emms-player-mpv)
+            (add-to-list 'emms-player-list 'emms-player-mpv))
+  :ensure t)
+(use-package emms-mode-line-cycle
+  ;; :defer t
+  :config (progn
+            (emms-mode-line 1)
+            (emms-playing-time 1)
 
-;;             ;; `emms-mode-line-cycle' can be used with emms-mode-line-icon.
-;;             (require 'emms-mode-line-icon)
-;;             (custom-set-variables '(emms-mode-line-cycle-use-icon-p t))
+            ;; `emms-mode-line-cycle' can be used with emms-mode-line-icon.
+            (require 'emms-mode-line-icon)
+            (custom-set-variables '(emms-mode-line-cycle-use-icon-p t))
 
-;;             (emms-mode-line-cycle 1))
-;;   :ensure t)
-;; (use-package ocodo-svg-modelines
-;;   :ensure t)
+            (emms-mode-line-cycle 1))
+  :ensure t)
+(use-package ocodo-svg-modelines
+  :ensure t)
 (use-package youdao-dictionary
   :config (progn
             ;; Enable Cache
@@ -308,6 +347,7 @@
             (global-set-key (kbd "C-c y") 'youdao-dictionary-search-at-point))
   :ensure t)
 (use-package rainbow-mode
+  :diminish rainbow-mode
   :config (progn
             (add-hook 'css-mode-hook 'rainbow-mode))
   ;; :defer t
@@ -317,12 +357,12 @@
             (when (require 'openwith nil 'noerror)
               (setq openwith-associations
                     (list
-                     (list (openwith-make-extension-regexp
-                            '("mpg" "mpeg" "mp3" "mp4"
-                              "avi" "wmv" "wav" "mov" "flv"
-                              "ogm" "ogg" "mkv"))
-                           "audacious"
-                           '(file))
+                     ;; (list (openwith-make-extension-regexp
+                     ;;        '("mpg" "mpeg" "mp3" "mp4"
+                     ;;          "avi" "wmv" "wav" "mov" "flv"
+                     ;;          "ogm" "ogg" "mkv"))
+                     ;;       "audacious"
+                     ;;       '(file))
                      ;; (list (openwith-make-extension-regexp
                      ;;        '("xbm" "pbm" "pgm" "ppm" "pnm"
                      ;;          "png" "bmp" "tif" "jpeg" "jpg"))
@@ -358,6 +398,9 @@
   :ensure t)
 (use-package nyan-mode
   :init (nyan-mode t)
+  :config (progn
+            (setq nyan-bar-length 48)
+            (setq nyan-cat-face-number 4))
   :ensure t)
 (use-package org-bullets
   :init (require 'org-bullets)
@@ -382,7 +425,9 @@
   :init (require 'highlight-parentheses)
   :config (progn
             (add-hook 'emacs-lisp-mode-hook 'highlight-parentheses-mode)
-            (add-hook 'cperl-mode-hook 'highlight-parentheses-mode))
+            (add-hook 'scheme-mode-hook 'highlight-parentheses-mode)
+            (add-hook 'cperl-mode-hook 'highlight-parentheses-mode)
+            (add-hook 'c-mode-hook 'highlight-parentheses-mode))
   :ensure t)
 (use-package vi-tilde-fringe
   :init (global-vi-tilde-fringe-mode t)
@@ -395,12 +440,12 @@
 ;;              (add-to-list 'Info-directory-list
 ;;                           "~/.emacs.d/site-lisp/magit/Documentation/"))
 ;;            (setq magit-completing-read-function 'ivy-completing-read))
-;; :ensure t)
-;; (use-package symon
-;;   :config (progn
-;;             (require 'symon)
-;;             (symon-mode))
 ;;   :ensure t)
+(use-package symon
+  :config (progn
+            (require 'symon)
+            (symon-mode 0))
+  :ensure t)
 ;; (use-package weibo
 ;;   :config (progn
 ;;             (require 'weibo)
@@ -410,6 +455,12 @@
 ;;   :ensure t)
 (use-package esup
   :ensure t)
+(use-package pangu-spacing
+  :config (progn
+            (require 'pangu-spacing)
+            (global-pangu-spacing-mode 1)
+            (setq pangu-spacing-real-insert-separtor t))
+  :ensure t)
 ;; (use-package diminish
 ;;   :ensure t)
 (custom-set-variables
@@ -417,7 +468,11 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(magit-push-arguments nil))
+ '(emms-mode-line-cycle-use-icon-p t)
+ '(magit-push-arguments nil)
+ '(package-selected-packages
+   (quote
+    (geiser 0blayout chess pangu-spacing company-c-headers youdao-dictionary yasnippet window-numbering weibo web-mode vi-tilde-fringe undo-tree tuareg symon swiper-helm spaceline smex smartparens rainbow-mode racket-mode plsense perl-completion org-page org-bullets openwith ocodo-svg-modelines nyan-mode neotree multiple-cursors magit highlight-parentheses highlight-indentation helm-projectile helm-emms go-mode flycheck expand-region esup emms-player-mpv emms-mode-line-cycle emmet-mode dracula-theme diminish company-web company-tern cmake-mode buffer-move avy angular-mode ample-theme ace-jump-mode ac-js2))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

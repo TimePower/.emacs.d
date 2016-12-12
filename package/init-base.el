@@ -11,10 +11,10 @@
 (setq tramp-default-method "ssh")
 
 ;;设置有用的个人信息,这在很多地方有用。
-(setq user-full-name "timepower")
+(setq user-full-name "xTpx")
 (setq user-mail-address "timepower@live.it")
 
-;;去掉Emacs和gnus启动时的引导界面
+;;去掉 Emacs 和 gnus 启动时的引导界面
 (setq inhibit-startup-message t)
 (setq gnus-inhibit-startup-message t)
 
@@ -40,7 +40,7 @@
 (scroll-bar-mode -1)
 
 ;; 显示列号
-;; (global-linum-mode t)
+(global-linum-mode t)
 
 ;; Highlight Line
 (global-hl-line-mode)
@@ -49,7 +49,7 @@
 (show-paren-mode t)
 ;;(setq show-paren-style 'parentheses)
 
-;; 默认显示 80列就换行
+;; 默认显示 80 列就换行
 (setq default-fill-column 80)
 ;; (setq refill-mode t)
 
@@ -78,9 +78,9 @@
 
 (auto-image-file-mode t);打开图片显示功能
 
-(fset 'yes-or-no-p 'y-or-n-p);以 y/n代表 yes/no
+(fset 'yes-or-no-p 'y-or-n-p);以 y/n 代表 yes/no
 
-;; 按下C-x k立即关闭掉当前的buffer  
+;; 按下 C-x k 立即关闭掉当前的 buffer  
 (global-set-key (kbd "C-x k") 'kill-this-buffer)  
 
 ;; 回车缩进
@@ -105,7 +105,7 @@
 ;; EWW Bookmarks List
 (global-set-key (kbd "C-c b") 'eww-list-bookmarks)
 
-;; 设置默认tab宽度
+;; 设置默认 tab 宽度
 (setq-default indent-tabs-mode nil)
 (setq default-tab-width 4)
 (setq tab-width 4) ; or any other preferred value
@@ -116,9 +116,8 @@
 ;;    (setq tab-stop-list (cons (* x 4) tab-stop-list)))
 
 ;;M-n/p 移动本文
-;;功能如下
-;;(global-set-key (kbd "M-n") 'scroll-up-line)
-;;(global-set-key (kbd "M-p") 'scroll-down-line)
+(global-set-key (kbd "M-n") 'scroll-up-line)
+(global-set-key (kbd "M-p") 'scroll-down-line)
 (defun hold-line-scroll-up()
   "Scroll the page with the cursor in the same line"
   (interactive)
@@ -144,7 +143,7 @@
 	(newline-and-indent)))
 (global-set-key (kbd "C-<return>") 'newline-next-current)
 
-;; newline-table实现IDEA的回车自动对齐功能
+;; newline-table 实现 IDEA 的回车自动对齐功能
 (defun newline-table()
   (interactive)
   (prog1 (newline-and-indent)
@@ -192,19 +191,34 @@
 (global-set-key (kbd "C-c n") 'move-line-down)
 ;; Diable backup file
 (setq make-backup-files nil)
-;; ORG-MODE
-(defadvice org-html-paragraph (before org-html-paragraph-advice
-                                      (paragraph contents info) activate)
-  "Join consecutive Chinese lines into a single long line without
-unwanted space when exporting org-mode to html."
-  (let* ((origin-contents (ad-get-arg 1))
-         (fix-regexp "[[:multibyte:]]")
-         (fixed-contents
-          (replace-regexp-in-string
-           (concat
-            "\\(" fix-regexp "\\) *\n *\\(" fix-regexp "\\)") "\\1\\2" origin-contents)))
 
-    (ad-set-arg 1 fixed-contents)))
+;; ORG-MODE
+;; 自定义 org-to-html 转换格式, C-h v org-html-postamble{format}.
+(setq org-html-postamble t)
+(setq org-html-postamble-format
+      '(("en" "<p class=\"author\">Author: %a </p>\n<p class=\"date\">Date: %T</p>\n<p class=\"creator\">%c</p>\n<p class=\"validation\">%v</p>")))
+;; (defcustom org-html-postamble-format
+;;   '(("en" "<p class=\"author\">Author: %a (%e)</p>
+;; <p class=\"date\">Last updated: %d</p>
+;; <p class=\"creator\">%c</p>")))
+
+;; (setq org-html-postamble-format
+;;       '(("en" "<p class=\"author\">Author: %e</p>
+;; <p class=\"date\">Last Updated: %d</p>
+;; <p class=\"postamble\"> Created by %c </p>")))
+
+;; (defadvice org-html-paragraph (before org-html-paragraph-advice
+;;                                       (paragraph contents info) activate)
+;;   "Join consecutive Chinese lines into a single long line without
+;; unwanted space when exporting org-mode to html."
+;;   (let* ((origin-contents (ad-get-arg 1))
+;;          (fix-regexp "[[:multibyte:]]")
+;;          (fixed-contents
+;;           (replace-regexp-in-string
+;;            (concat
+;;             "\\(" fix-regexp "\\) *\n *\\(" fix-regexp "\\)") "\\1\\2" origin-contents)))
+
+;;     (ad-set-arg 1 fixed-contents)))
 (defun gtd ()
   (interactive)
   (find-file "~/Dropbox/org-mode/todo.org")
