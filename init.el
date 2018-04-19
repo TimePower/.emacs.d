@@ -6,6 +6,8 @@
 (package-initialize)
 
 (add-to-list 'load-path "~/.emacs.d/package/")
+(setq custom-file "~/.emacs.d/custom.el")
+(load custom-file)
 (load "init-elpa.el")
 (load "init-base.el")
 ;; (load "init-page.el")
@@ -36,6 +38,7 @@
    ("C-x u" . undo-tree-visualize))
   :ensure t)
 (use-package smartparens
+  :diminish smartparens-mode
   :init (smartparens-global-mode 1)
   ;; :defer t
   :ensure t)
@@ -118,6 +121,7 @@
             (add-hook 'web-mode-hook 'projectile-mode)
             (add-hook 'css-mode-hook 'projectile-mode)
             (add-hook 'c-mode-hook 'projectile-mode)
+            (add-hook 'c++-mode-hook 'projectile-mode)
             (setq projectile-enable-caching t)
             (setq projectile-globally-ignored-directories '("node_modules")))
   :ensure t)
@@ -125,13 +129,14 @@
   :ensure t)
 (use-package yasnippet
   ;; :defer t
-  :diminish yas-global-mode
+  :diminish yas-minor-mode
   :init (yas-global-mode 1)
   :config (progn
             (add-to-list 'yas/root-directory "~/.emacs.d/snippets")
             (yas/initialize))
   :ensure t)
 (use-package auto-complete
+  :diminish auto-complete-mode
   :config (progn
             ;; (after (:slime) (add-to-list 'ac-modes 'slime-repl-mode))
             (require 'auto-complete-config)
@@ -198,9 +203,6 @@
             (global-set-key (kbd "C-|") 'company-complete)
             )
   :ensure t)
-(use-package company-c-headers
-  :config (add-to-list 'company-backends 'company-c-headers)
-  :ensure t)
 (use-package company-web
   :config (progn
             (add-hook 'web-mode-hook (lambda ()
@@ -212,6 +214,28 @@
             (add-to-list 'company-backends 'company-tern)
             (setq company-tern-meta-as-single-line t)
             (setq company-tooltip-align-annotations t))
+  :ensure t)
+(use-package company-lsp
+  :config (progn
+            (require 'company-lsp)
+            (push 'company-lsp company-backends)
+            (setq company-transformers nil company-lsp-async t company-lsp-cache-candidates nil))
+  :ensure t)
+(use-package cquery
+  ;; :commands lsp-cquery-enable
+  ;; :init (add-hook 'c-mode-common-hook #'cquery//enable)
+  :config (progn
+            (require 'cquery)
+            (setq cquery-executable "/usr/bin/cquery")
+            (setq cquery-extra-init-params '(:index (:comments 2) :cacheFormat "msgpack"))
+            (defun cquery//enable ()
+              (condition-case nil
+                  (lsp-cquery-enable)
+                (user-error nil)))
+            (use-package cquery
+              :commands lsp-cquery-enable
+              :init (add-hook 'c-mode-common-hook #'cquery//enable))
+            )
   :ensure t)
 (use-package emmet-mode
   :diminish emmet-mode
@@ -256,6 +280,9 @@
             (add-hook 'js-mode-hook 'highlight-indentation-current-column-mode)
             (add-hook 'js-mode-hook 'highlight-parentheses-mode))
   :ensure t)
+(use-package json-mode
+  :mode ("\\.json\\'" . json-mode)
+  :ensure t)
 (use-package ac-js2
   :config (progn
             (setq ac-js2-evaluate-calls t)
@@ -281,6 +308,31 @@
 ;; (use-package go-mode
 ;;   :init (require 'go-mode-autoloads)
 ;;   :ensure t)
+(use-package irony
+  :config (progn
+            (add-hook 'c++-mode-hook 'irony-mode)
+            (add-hook 'c-mode-hook 'irony-mode)
+            (defun my-irony-mode-hook ()
+              (define-key irony-mode-map [remap completion-at-point]
+                'irony-completion-at-point-async)
+              (define-key irony-mode-map [remap complete-symbol]
+                'irony-completion-at-point-async))
+            (add-hook 'irony-mode-hook 'my-irony-mode-hook)
+            (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options))
+  :ensure t)
+(use-package company-irony
+  ;; :config (progn
+  ;;           (eval-after-load 'company
+  ;;             '(add-to-list 'company-backends 'company-irony)))
+  :ensure t)
+(use-package company-irony-c-headers
+  :config (progn
+            (require 'company-irony-c-headers)
+            ;; Load with `irony-mode` as a grouped backend
+            (eval-after-load 'company
+              '(add-to-list
+                'company-backends '(company-irony-c-headers company-irony))))
+  :ensure t)
 (use-package cperl-mode
   :mode ("\\.pl\\'" . cperl-mode)
   )
@@ -337,6 +389,8 @@
 
             (emms-mode-line-cycle 1))
   :ensure t)
+(use-package nlinum
+  :ensure  t)
 (use-package ocodo-svg-modelines
   :ensure t)
 (use-package youdao-dictionary
@@ -345,6 +399,11 @@
             (setq url-automatic-caching t)
             ;; Example Key binding
             (global-set-key (kbd "C-c y") 'youdao-dictionary-search-at-point))
+  :ensure t)
+(use-package bing-dict
+  :config (progn
+            (require 'bing-dict)
+            (global-set-key (kbd "C-c d") 'bing-dict-brief))
   :ensure t)
 (use-package rainbow-mode
   :diminish rainbow-mode
@@ -379,6 +438,8 @@
                      ))
               (openwith-mode 1)))
   :ensure t)
+;; (use-package ereader
+;;   :ensure t)
 (use-package multiple-cursors
   :init (require 'multiple-cursors)
   :config (progn
@@ -401,6 +462,11 @@
   :config (progn
             (setq nyan-bar-length 48)
             (setq nyan-cat-face-number 4))
+  :ensure t)
+(use-package emojify
+  :config (progn
+            (add-hook 'after-init-hook #'global-emojify-mode)
+            (prettify-symbols-mode t))
   :ensure t)
 (use-package org-bullets
   :init (require 'org-bullets)
@@ -427,7 +493,9 @@
             (add-hook 'emacs-lisp-mode-hook 'highlight-parentheses-mode)
             (add-hook 'scheme-mode-hook 'highlight-parentheses-mode)
             (add-hook 'cperl-mode-hook 'highlight-parentheses-mode)
-            (add-hook 'c-mode-hook 'highlight-parentheses-mode))
+            (add-hook 'c-mode-hook 'highlight-parentheses-mode)
+            (add-hook 'c++-mode-hook 'highlight-parentheses-mode)
+            (add-hook 'org-mode-hook 'highlight-parentheses-mode))
   :ensure t)
 (use-package vi-tilde-fringe
   :init (global-vi-tilde-fringe-mode t)
@@ -456,6 +524,7 @@
 (use-package esup
   :ensure t)
 (use-package pangu-spacing
+  :diminish pangu-spacing-mode
   :config (progn
             (require 'pangu-spacing)
             (global-pangu-spacing-mode 1)
@@ -463,19 +532,3 @@
   :ensure t)
 ;; (use-package diminish
 ;;   :ensure t)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(emms-mode-line-cycle-use-icon-p t)
- '(magit-push-arguments nil)
- '(package-selected-packages
-   (quote
-    (geiser 0blayout chess pangu-spacing company-c-headers youdao-dictionary yasnippet window-numbering weibo web-mode vi-tilde-fringe undo-tree tuareg symon swiper-helm spaceline smex smartparens rainbow-mode racket-mode plsense perl-completion org-page org-bullets openwith ocodo-svg-modelines nyan-mode neotree multiple-cursors magit highlight-parentheses highlight-indentation helm-projectile helm-emms go-mode flycheck expand-region esup emms-player-mpv emms-mode-line-cycle emmet-mode dracula-theme diminish company-web company-tern cmake-mode buffer-move avy angular-mode ample-theme ace-jump-mode ac-js2))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
