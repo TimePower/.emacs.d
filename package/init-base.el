@@ -40,7 +40,9 @@
 (scroll-bar-mode -1)
 
 ;; 显示列号
-(global-linum-mode t)
+;; (global-linum-mode t)
+(global-nlinum-mode t)
+
 
 ;; Highlight Line
 (global-hl-line-mode)
@@ -81,7 +83,7 @@
 (fset 'yes-or-no-p 'y-or-n-p);以 y/n 代表 yes/no
 
 ;; 按下 C-x k 立即关闭掉当前的 buffer  
-(global-set-key (kbd "C-x k") 'kill-this-buffer)  
+(global-set-key (kbd "C-x k") 'kill-this-buffer)
 
 ;; 回车缩进
 (global-set-key "\C-m" 'newline-and-indent)
@@ -116,8 +118,8 @@
 ;;    (setq tab-stop-list (cons (* x 4) tab-stop-list)))
 
 ;;M-n/p 移动本文
-(global-set-key (kbd "M-n") 'scroll-up-line)
-(global-set-key (kbd "M-p") 'scroll-down-line)
+;; (global-set-key (kbd "M-n") 'scroll-up-line)
+;; (global-set-key (kbd "M-p") 'scroll-down-line)
 (defun hold-line-scroll-up()
   "Scroll the page with the cursor in the same line"
   (interactive)
@@ -219,7 +221,26 @@
 ;;             "\\(" fix-regexp "\\) *\n *\\(" fix-regexp "\\)") "\\1\\2" origin-contents)))
 
 ;;     (ad-set-arg 1 fixed-contents)))
+
+;; 去除 Org 导出的 HTML 中的多余的空格
+(defadvice org-html-paragraph (before org-html-paragraph-advice
+                                      (paragraph contents info) activate)
+  "Join consecutive Chinese lines into a single long line without
+unwanted space when exporting org-mode to html."
+  (let* ((origin-contents (ad-get-arg 1))
+         (fix-regexp "[[:multibyte:]]")
+         (fixed-contents
+          (replace-regexp-in-string
+           (concat
+            "\\(" fix-regexp "\\) *\n *\\(" fix-regexp "\\)") "\\1\\2" origin-contents)))
+
+    (ad-set-arg 1 fixed-contents)))
+
 (defun gtd ()
   (interactive)
-  (find-file "~/Dropbox/org-mode/todo.org")
-  )
+  (find-file "~/Dropbox/org-mode/todo.org"))
+
+;; Steam Get Keys
+;; (defun all-urls-in-buffer ()
+;;   (interactive)
+;;   (pop-to-buffer (s-match-strings-all "ab." "abXabY") "test" "test"))
